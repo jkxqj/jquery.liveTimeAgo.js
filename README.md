@@ -2,7 +2,7 @@
 
 ### A jQuery plugin to get "date ago" in realtime!
 
-
+###	解决了ie和火狐浏览器下不兼容的问题
 
 ## Example : 
 
