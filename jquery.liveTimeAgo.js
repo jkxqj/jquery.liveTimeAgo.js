@@ -11,18 +11,19 @@
         var defauts =
         {
             translate: {
-                'year': '% year ago',
-                'years': '% years ago',
-                'month':'% month ago',
-                'months':'% months ago',
-                'day': '% day ago',
-                'days': '% days ago',
-                'hour': '% hour ago',
-                'hours': '% hours ago',
-                'minute': '% minute ago',
-                'minutes': '% minutes ago',
-                'seconds': 'few seconds ago',
-                'error': 'unknow time',
+            	'year' : '%年前',
+    			'years' : '%年前',
+    			'month' : '%个月前',
+    			'months' : '%个月前',
+    			'day' : '%天前',
+    			'days' : '%天前',
+    			'hour' : '%小时前',
+    			'hours' : '%小时前',
+    			'minute' : '%分钟前',
+    			'minutes' : '%分钟前',
+    			'seconds' : '几秒钟前',
+    			'second' : '几秒钟前',
+    			'error' : '未知时间',
             }
         };
 
@@ -31,8 +32,9 @@
         }
 
         function dateDiff(date1, date2) {
-            var diff = {}                           
-            var tmp = date2 - date1;
+            var diff = {}           
+            date1 = new Date(date1);  //此处为了解决ie下不兼容的问题
+            var tmp = date2 - date1;  
             tmp = Math.floor(tmp / 1000);          
             diff.sec = tmp % 60;                  
             tmp = Math.floor((tmp - diff.sec) / 60);    
@@ -68,17 +70,30 @@
                 return options.translate['minutes'].replace('%', diff.min);
             } else if (diff.min == 1) {
                 return options.translate['minute'].replace('%', diff.min);
-            } else if (diff.sec >= 1) {
+            } else if (diff.sec > 1) {
                 return options.translate['seconds'].replace('%', diff.sec);
+            } else if (diff.sec == 1) {
+                return options.translate['second'].replace('%', diff.sec);
             } else{
                 return options.translate['error'];
             }
         }
+        
+        //此处为了解决ie下不兼容的问题，2016-10-10 这样的转成 2016/10/10
+        function getTime(dateStr){  
+        	console.log("dateStr="+dateStr)
+            dateStr = dateStr.replace("-", "/");  
+            return Date.parse(dateStr);  
+        }  
+        
 
         function refreshLive() {
             $('.liveTimeAgo-active').each(function () {
                 var timeText = (typeof $(this).attr('data-lta-type') != 'undefined' && $(this).attr('data-lta-type') == 'timestamp') ? parseInt($(this).attr('data-lta-value')) : $(this).attr('data-lta-value');
-                var time = new Date(timeText);
+                var time = getTime(timeText);
+                if(!time){
+                	time=new Date(timeText);  //此处为了解决火狐下不兼容的问题
+                }
                 $(this).text(getFormattedDateAgo(time));
             });
         }
@@ -93,9 +108,7 @@
             var dateNow = new Date();
             var seconds = dateNow.getSeconds();
             var fake_secondes = 60 - seconds;
-            console.log(fake_secondes);
             var fakeInterval = setInterval(function () {
-                    console.log(fake_secondes);
                     fake_secondes--;
                     if(fake_secondes < 0){
                         clearInterval(fakeInterval);
@@ -115,7 +128,10 @@
             }else{
                 var timeText = (typeof $(this).attr('data-lta-type') != 'undefined' && $(this).attr('data-lta-type') == 'timestamp') ? $(this).text() * 1000 : $(this).text();
             }
-            var time = new Date(timeText);
+            var time = getTime(timeText);
+            if(!time){
+            	time=new Date(timeText);   //此处为了解决火狐下不兼容的问题
+            }
             $(this)
                 .attr('data-lta-value', timeText)
                 .addClass('liveTimeAgo-active')
